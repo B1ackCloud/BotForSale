@@ -3,65 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dark Shop</title>
+    <title>Dark Store</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { 
-            background-color: var(--tg-theme-bg-color, #1c1c1d); 
+        body {
+            background-color: var(--tg-theme-bg-color, #1f1f1f);
             color: var(--tg-theme-text-color, #ffffff);
-            font-family: sans-serif; 
-            padding: 20px;
+            font-family: sans-serif;
+            padding: 10px;
+            margin: 0;
         }
-        .item {
-            background: var(--tg-theme-secondary-bg-color, #2c2c2e);
+        .container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .card {
+            background: var(--tg-theme-secondary-bg-color, #2d2d2d);
+            border-radius: 12px;
             padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 10px;
+            text-align: center;
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
-            align-items: center;
         }
-        button {
-            background-color: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
+        .icon { font-size: 40px; margin-bottom: 10px; }
+        .title { font-size: 14px; font-weight: bold; margin-bottom: 5px; }
+        .price { color: #4ade80; font-weight: bold; margin-bottom: 10px; }
+        .btn {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #fff);
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 8px;
+            border-radius: 6px;
             width: 100%;
-            font-size: 16px;
             cursor: pointer;
-            margin-top: 20px;
+            font-weight: bold;
         }
+        .btn:active { opacity: 0.8; }
     </style>
 </head>
 <body>
-    <h1>Выберите товар</h1>
+    <h2 style="text-align:center; margin-top:0;">Каталог</h2>
     
-    <div class="item">
-        <span>Telegram Premium (1 мес)</span>
-        <b>300 ₽</b>
-        <input type="radio" name="product" value="tg_prem_1" checked>
-    </div>
+    <div class="container">
+        <div class="card">
+            <div class="icon">🚀</div>
+            <div class="title">Telegram Premium</div>
+            <div class="price">299 ₽</div>
+            <button class="btn" onclick="buy('tg_prem', 299)">Купить</button>
+        </div>
 
-    <div class="item">
-        <span>VPN Config (США)</span>
-        <b>150 ₽</b>
-        <input type="radio" name="product" value="vpn_usa">
-    </div>
+        <div class="card">
+            <div class="icon">🇺🇸</div>
+            <div class="title">VPN USA</div>
+            <div class="price">99 ₽</div>
+            <button class="btn" onclick="buy('vpn_usa', 99)">Купить</button>
+        </div>
 
-    <button onclick="sendOrder()">Оформить заказ</button>
+        <div class="card">
+            <div class="icon">🔑</div>
+            <div class="title">Win 10 Key</div>
+            <div class="price">499 ₽</div>
+            <button class="btn" onclick="buy('win10', 499)">Купить</button>
+        </div>
+
+        <div class="card">
+            <div class="icon">🔞</div>
+            <div class="title">PornHub Premium</div>
+            <div class="price">50 ₽</div>
+            <button class="btn" onclick="buy('ph_prem', 50)">Купить</button>
+        </div>
+    </div>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Раскрыть на весь экран
+        tg.expand();
 
-        function sendOrder() {
-            // Ищем выбранный товар
-            let product = document.querySelector('input[name="product"]:checked').value;
-            
-            // Отправляем данные обратно в Python-бота
-            // Data будет доступна в боте как message.web_app_data.data
-            tg.sendData(JSON.stringify({item: product}));
+        function buy(code, price) {
+            // Спрашиваем подтверждение через нативный попап Телеграма
+            tg.showPopup({
+                title: 'Подтверждение',
+                message: `Купить этот товар за ${price}₽?`,
+                buttons: [
+                    {id: 'ok', type: 'ok', text: 'Да, беру'},
+                    {id: 'cancel', type: 'cancel', text: 'Отмена'}
+                ]
+            }, function(btnId) {
+                if (btnId === 'ok') {
+                    // Отправляем данные боту
+                    let data = JSON.stringify({
+                        action: "buy",
+                        code: code,
+                        price: price
+                    });
+                    tg.sendData(data);
+                }
+            });
         }
     </script>
 </body>
